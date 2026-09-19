@@ -70,12 +70,30 @@ same name. Other files already in a board's folder are left alone and kept out o
    `plugin.json`, builds a Python environment for it and installs `requirements.txt` on first use.
 4. Restart KiCad. The PCB editor toolbar gets **Export Boards** and **Export Boards (Dry Run)**.
 
-The root-level `metadata.json` and `LICENSE` are only needed if you package this repository for
-KiCad's Plugin and Content Manager (PCM), for example zipping `metadata.json` and `plugins/` for
-"Install from File" or submission to a package repository. See
-[KiCad's addon docs](https://dev-docs.kicad.org/en/addons/index.html) for the archive layout PCM
-expects (`metadata.json` at the archive root next to a `plugins/` folder). Manual installation
-(step 3 above) does not need `metadata.json` at all.
+### Building the PCM package
+
+To install through KiCad's Plugin and Content Manager (PCM > "Install from File..."), build the
+package zip:
+
+```
+.\scripts\build_package.ps1        # Windows
+scripts/build_package.sh           # Linux / macOS / Git Bash
+python scripts/build_package.py    # anywhere Python 3.9+ runs
+```
+
+This writes `dist/<identifier>-<version>-pcm.zip` (the version comes from `metadata.json`). It
+contains only what KiCad needs: `metadata.json` and `LICENSE` at the archive root, everything under
+`plugins/` (minus `__pycache__` and `.pyc` files) and a `resources/` folder if you add one for an
+icon. Tests, docs, the sample project and backups are left out. Before writing, the script checks
+that `metadata.json` and `plugins/plugin.json` share an identifier and that every action's
+entrypoint exists, and afterwards it re-opens the zip to confirm the layout. Builds are
+reproducible: the same sources give a byte-identical zip.
+
+`--list` shows what would be packaged without writing anything; `--out-dir` changes the output
+folder. The script prints the `download_sha256`, `download_size` and `install_size` values a PCM
+repository entry needs. See [KiCad's addon docs](https://dev-docs.kicad.org/en/addons/index.html)
+for the layout PCM expects. Manual installation (step 3 above) does not need `metadata.json` at
+all.
 
 Each run writes a report (`export_report.txt` or `dry_run_report.txt`) into the plugin's settings
 folder and opens it. Start with the dry run.

@@ -11,7 +11,9 @@ FAKE_CLI = "C:/fake/kicad-cli.exe"
 
 
 def _normalise(text: str, board_dir: Path) -> str:
-    return text.replace(str(board_dir), "<BOARD_DIR>").replace("\\", "/")
+    text = text.replace(str(board_dir), "<BOARD_DIR>").replace("\\", "/")
+    # list2cmdline quotes arguments that contain spaces; remove the quotes so the golden file comparison works
+    return text.replace('"', "")
 
 
 def _plan(panel_path, tmp_path):
@@ -23,6 +25,14 @@ def test_dry_run_report_matches_the_golden_file(panel_path, tmp_path):
     if os.environ.get("UPDATE_GOLDEN"):
         GOLDEN.parent.mkdir(exist_ok=True)
         GOLDEN.write_text(text, encoding="utf-8", newline="\n")
+    assert text == GOLDEN.read_text(encoding="utf-8")
+
+
+def test_dry_run_report_matches_the_golden_file_when_the_project_path_has_a_space(tmp_path):
+    board = tmp_path / "my project" / "panel.kicad_pcb"
+    board.parent.mkdir()
+    board.write_bytes((Path(__file__).parent / "fixtures" / "panel.kicad_pcb").read_bytes())
+    text = _normalise(render(_plan(board, tmp_path), None, dry_run=True), board.parent)
     assert text == GOLDEN.read_text(encoding="utf-8")
 
 

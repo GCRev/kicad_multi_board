@@ -1,0 +1,34 @@
+Multi-board fabrication export - DRY RUN (nothing is written)
+Board file  : <BOARD_DIR>/panel.kicad_pcb
+Output root : <BOARD_DIR>/fab_out
+kicad-cli   : C:/fake/kicad-cli.exe (10.99)
+Drill flags :
+  --drill-origin absolute                  [board]
+
+BOARDS (2)
+  [main]  rule area at (99, 74) [0dd5ab04]
+    folder : <BOARD_DIR>/fab_out/main
+    zip    : <BOARD_DIR>/fab_out/main.zip
+    items  : footprint x1, gr_rect x1, group x1, segment x3, zone x1
+    shared : zone at (99, 74) [d0229f9b] (also in another board)
+    commands:
+      C:/fake/kicad-cli.exe pcb export gerbers --board-plot-params --check-zones -o <BOARD_DIR>/fab_out/main <temp>/main/main.kicad_pcb
+      C:/fake/kicad-cli.exe pcb export drill --drill-origin absolute -o <BOARD_DIR>/fab_out/main <temp>/main/main.kicad_pcb
+  [side]  rule area at (126, 74) [ff2df8b4]
+    folder : <BOARD_DIR>/fab_out/side
+    zip    : <BOARD_DIR>/fab_out/side.zip
+    items  : gr_poly x1, group x1, segment x2, via x1, zone x1
+    shared : zone at (99, 74) [d0229f9b] (also in another board)
+    commands:
+      C:/fake/kicad-cli.exe pcb export gerbers --board-plot-params --check-zones -o <BOARD_DIR>/fab_out/side <temp>/side/side.kicad_pcb
+      C:/fake/kicad-cli.exe pcb export drill --drill-origin absolute -o <BOARD_DIR>/fab_out/side <temp>/side/side.kicad_pcb
+
+UNOWNED ITEMS (in no rule area; excluded from every board)
+  gr_text at (125, 103) [c0000000]
+
+WARNINGS (3)
+  segment at (120, 80) [b0000000] straddles the edge of 'main'
+  1 item(s) are inside no rule area and will be excluded
+  drill dialog state not found; using kicad-cli defaults for drill options
+
+No errors. Run the export to write these files.

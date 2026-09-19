@@ -1,0 +1,28 @@
+{
+  "dialog": {
+    "controls": {
+      "Generate Drill Files": {
+        "__geometry": {
+          "h": 434,
+          "w": 569,
+          "x": 1650,
+          "y": 336
+        },
+        "wxCheckBox_0": false,
+        "wxCheckBox_1": false,
+        "wxCheckBox_2": false,
+        "wxCheckBox_3": false,
+        "wxCheckBox_4": false,
+        "wxCheckBox_5": false,
+        "wxChoice_0": 1,
+        "wxChoice_1": 0,
+        "wxChoice_2": 0,
+        "wxChoice_3": 0,
+        "wxRadioButton_0": true,
+        "wxRadioButton_1": false,
+        "wxStaticBox_0wxTextCtrl_0": "",
+        "wxTextCtrl_0": "fabrication/"
+      }
+    }
+  }
+}

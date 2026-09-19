@@ -4,3 +4,4 @@ __pycache__/
 dist/
 ki_multi_boards-backups/
 *.kicad_prl
+fabrication/

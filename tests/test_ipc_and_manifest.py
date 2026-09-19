@@ -9,7 +9,8 @@ import pytest
 from multiboard import ipc
 from multiboard.exporter import CommandResult
 
-PLUGIN = Path(__file__).parent.parent / "plugin"
+ROOT = Path(__file__).parent.parent
+PLUGIN = ROOT / "plugins"
 FIXTURES = Path(__file__).parent / "fixtures"
 
 
@@ -27,6 +28,17 @@ def test_manifest_is_valid_against_kicads_schema_and_entrypoints_exist():
 
 def test_plugin_requirements_name_kipy():
     assert "kicad-python" in (PLUGIN / "requirements.txt").read_text(encoding="utf-8")
+
+
+def test_pcm_metadata_is_valid_and_matches_the_plugin_manifest():
+    jsonschema = pytest.importorskip("jsonschema")
+    manifest = json.loads((PLUGIN / "plugin.json").read_text(encoding="utf-8"))
+    metadata = json.loads((ROOT / "metadata.json").read_text(encoding="utf-8"))
+    schema = json.loads((FIXTURES / "pcm_schema.json").read_text(encoding="utf-8"))
+    jsonschema.validate(metadata, schema)
+    assert metadata["identifier"] == manifest["identifier"] == ipc.IDENTIFIER
+    assert metadata["type"] == "plugin"
+    assert all(v["runtime"] == "ipc" for v in metadata["versions"])
 
 
 class FakeBoard:

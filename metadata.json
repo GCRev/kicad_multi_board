@@ -1,0 +1,22 @@
+{
+  "$schema": "https://go.kicad.org/pcm/schemas/v2",
+  "name": "Multi-Board Fabrication Export",
+  "description": "Exports separate gerber and drill outputs, and a zip, for each board marked out by a rule area on Edge.Cuts.",
+  "description_full": "Marks out each board on a panel with a rule area on the Edge.Cuts layer carrying a board_name custom property, then produces gerber and drill files for that board only, puts them in a folder named after it, and zips them. Plot settings come from the board's saved plot parameters; drill options come from the drill dialog's remembered values, falling back to kicad-cli defaults. Requires KiCad's IPC API server to be enabled.",
+  "identifier": "io.github.multiboard-fab-export",
+  "type": "plugin",
+  "author": {
+    "name": "Graham Held",
+    "contact": {}
+  },
+  "license": "GPL-3.0-or-later",
+  "resources": {},
+  "versions": [
+    {
+      "version": "0.1.0",
+      "status": "development",
+      "runtime": "ipc",
+      "kicad_version": "10.0"
+    }
+  ]
+}

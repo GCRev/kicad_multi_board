@@ -4,7 +4,7 @@ from pathlib import Path
 
 from multiboard import cli
 
-PLUGIN = Path(__file__).parent.parent / "plugin"
+PLUGIN = Path(__file__).parent.parent / "plugins"
 
 
 def test_missing_board_file_exits_2(tmp_path, capsys):

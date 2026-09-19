@@ -65,10 +65,17 @@ same name. Other files already in a board's folder are left alone and kept out o
    `kicad_common.json`, also on the Plugins page of Preferences). KiCad builds the plugin's own
    environment with it, so it must point at a working Python 3.9 or newer; a nightly's settings can
    still point at an older KiCad's interpreter.
-3. Copy the `plugin` folder into KiCad's user plugins folder, for example
+3. Copy the `plugins` folder into KiCad's user plugins folder, for example
    `Documents\KiCad\10.99\plugins\multiboard-fab-export\`. KiCad finds it by scanning for
    `plugin.json`, builds a Python environment for it and installs `requirements.txt` on first use.
 4. Restart KiCad. The PCB editor toolbar gets **Export Boards** and **Export Boards (Dry Run)**.
+
+The root-level `metadata.json` and `LICENSE` are only needed if you package this repository for
+KiCad's Plugin and Content Manager (PCM), for example zipping `metadata.json` and `plugins/` for
+"Install from File" or submission to a package repository. See
+[KiCad's addon docs](https://dev-docs.kicad.org/en/addons/index.html) for the archive layout PCM
+expects (`metadata.json` at the archive root next to a `plugins/` folder). Manual installation
+(step 3 above) does not need `metadata.json` at all.
 
 Each run writes a report (`export_report.txt` or `dry_run_report.txt`) into the plugin's settings
 folder and opens it. Start with the dry run.
@@ -81,7 +88,7 @@ The same pipeline runs on a saved board file without KiCad running:
 python -m multiboard path\to\panel.kicad_pcb --dry-run --kicad-cli path\to\kicad-cli.exe
 ```
 
-Run it from the `plugin` folder, or set `PYTHONPATH` to it. `--kicad-cli` defaults to `$KICAD_CLI`.
+Run it from the `plugins` folder, or set `PYTHONPATH` to it. `--kicad-cli` defaults to `$KICAD_CLI`.
 The exit code is 0 on success, 1 if a board failed and 2 if the plan has errors.
 
 ## Development

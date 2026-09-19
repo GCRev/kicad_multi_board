@@ -38,9 +38,23 @@ def _project_file(directory: Path) -> Optional[Path]:
     return found[0] if found else None
 
 
+def _write_report(text: str, name: str, directories: list[Path]) -> Optional[Path]:
+    """Write the report into the first directory that works; None if none do."""
+    for directory in directories:
+        try:
+            directory.mkdir(parents=True, exist_ok=True)
+            path = directory / name
+            path.write_bytes(text.encode("utf-8", errors="replace"))
+            return path
+        except Exception:  # noqa: BLE001 - try the next location
+            continue
+    return None
+
+
 def run_action(dry_run: bool, runner: exporter.Runner = exporter.run) -> int:
     """Snapshot the open board, run the pipeline, and show the report. Returns the exit code."""
-    report_dir = Path(tempfile.gettempdir()) / "multiboard-report"  # replaced once KiCad names one
+    fallback_dir = Path(tempfile.gettempdir()) / "multiboard-report"
+    report_dir = fallback_dir  # replaced once KiCad names one
     name = "dry_run_report.txt" if dry_run else "export_report.txt"
     try:
         from kipy import KiCad  # imported here so the rest of the package needs no kipy
@@ -68,8 +82,11 @@ def run_action(dry_run: bool, runner: exporter.Runner = exporter.run) -> int:
         text = "Multi-board fabrication export failed unexpectedly:\n\n" + traceback.format_exc()
         code = 3
 
-    report_dir.mkdir(parents=True, exist_ok=True)
-    path = report_dir / name
-    path.write_text(text, encoding="utf-8")
-    open_in_viewer(path)
+    directories = [report_dir] if report_dir == fallback_dir else [report_dir, fallback_dir]
+    path = _write_report(text, name, directories)
+    if path is not None:
+        try:
+            open_in_viewer(path)
+        except Exception:  # noqa: BLE001 - the report is already written; the viewer is a convenience
+            pass
     return code

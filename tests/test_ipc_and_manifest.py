@@ -139,3 +139,33 @@ def test_missing_project_directory_is_reported(monkeypatch, opened, panel_path, 
     _install_fake_kipy(monkeypatch, FakeKiCad(board, tmp_path / "settings"))
     assert ipc.run_action(dry_run=True, runner=_cli) == 3
     assert "did not report the project directory" in (tmp_path / "settings" / "dry_run_report.txt").read_text(encoding="utf-8")
+
+
+def test_unwritable_settings_folder_falls_back_to_the_temp_folder(monkeypatch, opened, panel_path, tmp_path):
+    settings = tmp_path / "settings_is_a_file"
+    settings.write_text("not a directory", encoding="utf-8")
+    _install_fake_kipy(monkeypatch, FakeKiCad(FakeBoard(panel_path.parent, panel_path), settings))
+    monkeypatch.setattr(ipc.tempfile, "gettempdir", lambda: str(tmp_path))
+    assert ipc.run_action(dry_run=True, runner=_cli) == 0
+    fallback = tmp_path / "multiboard-report" / "dry_run_report.txt"
+    assert "DRY RUN" in fallback.read_text(encoding="utf-8")
+    assert opened == [fallback]
+
+
+def test_a_lone_surrogate_in_the_report_does_not_stop_it_being_written(monkeypatch, opened, panel_path, tmp_path):
+    monkeypatch.setattr(ipc.report, "render", lambda plan, result, dry_run: "DRY RUN \ud800 broken")
+    _install_fake_kipy(monkeypatch, FakeKiCad(FakeBoard(panel_path.parent, panel_path), tmp_path / "settings"))
+    assert ipc.run_action(dry_run=True, runner=_cli) == 0
+    written = (tmp_path / "settings" / "dry_run_report.txt").read_text(encoding="utf-8")
+    assert written.startswith("DRY RUN ") and written.endswith(" broken")
+    assert len(opened) == 1
+
+
+def test_a_viewer_that_raises_does_not_lose_the_exit_code(monkeypatch, panel_path, tmp_path):
+    def no_viewer(path):
+        raise RuntimeError("no viewer")
+
+    monkeypatch.setattr(ipc, "open_in_viewer", no_viewer)
+    _install_fake_kipy(monkeypatch, FakeKiCad(FakeBoard(panel_path.parent, panel_path), tmp_path / "settings"))
+    assert ipc.run_action(dry_run=True, runner=_cli) == 0
+    assert (tmp_path / "settings" / "dry_run_report.txt").is_file()

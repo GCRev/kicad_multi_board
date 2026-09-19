@@ -33,10 +33,21 @@ def test_cli_version_is_none_when_unavailable():
 
 
 def test_check_version():
-    assert check_version((10, 99), "10.99") is None
-    assert check_version((10, 99), None) is None  # nothing to compare against
-    assert "10.0" in check_version((10, 0), "10.99") and "10.99" in check_version((10, 0), "10.99")
-    assert "could not determine" in check_version(None, "10.99")
+    assert check_version((10, 99), "10.99") == (None, None)
+    assert check_version((10, 99), None) == (None, None)  # nothing to compare against
+    assert "could not determine" in check_version(None, "10.99")[0]
+
+
+def test_a_cli_older_than_the_board_is_an_error():
+    error, warning = check_version((10, 0), "10.99")
+    assert "10.0" in error and "10.99" in error and warning is None
+    assert check_version((9, 0), "10.0")[0] is not None
+
+
+def test_a_cli_newer_than_the_board_is_only_a_warning():
+    error, warning = check_version((10, 0), "9.0")
+    assert error is None and "9.0" in warning and "10.0" in warning
+    assert check_version((11, 0), "10.99")[0] is None
 
 
 def test_run_captures_output_and_exit_code():

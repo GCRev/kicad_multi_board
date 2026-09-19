@@ -52,9 +52,9 @@ def render(plan: Plan, result: Optional[RunResult], dry_run: bool) -> str:
         add("")
         add("SKIPPED RULE AREAS")
         for zone in plan.discovery.skipped:
-            place = f"({zone.location[0]:g}, {zone.location[1]:g})" if zone.location else "(no outline)"
+            place = f"at ({zone.location[0]:g}, {zone.location[1]:g})" if zone.location else "with no outline"
             keys = f"; properties found: {', '.join(zone.keys)}" if zone.keys else "; no properties"
-            add(f"  at {place}: {zone.reason}{keys}")
+            add(f"  {place}: {zone.reason}{keys}")
 
     if plan.classification.unowned:
         add("")

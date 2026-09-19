@@ -77,6 +77,13 @@ def test_build_is_reproducible(tmp_path):
     assert first == second
 
 
+def test_entries_do_not_record_the_platform_that_built_them(tmp_path):
+    """create_system defaults to 0 on Windows and 3 elsewhere; it must not leak into the archive."""
+    package = bp.build(make_tree(tmp_path / "repo"), tmp_path / "out")
+    with zipfile.ZipFile(package) as archive:
+        assert {info.create_system for info in archive.infolist()} == {3}
+
+
 def test_identifier_mismatch_is_an_error(tmp_path):
     root = make_tree(tmp_path / "repo")
     manifest = json.loads((root / "plugins" / "plugin.json").read_text(encoding="utf-8"))

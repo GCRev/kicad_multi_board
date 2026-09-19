@@ -5,6 +5,9 @@ You mark out each board with a rule area on the `Edge.Cuts` layer and give it a 
 custom property. The plugin then produces gerber and drill files for that board only, puts them
 in a folder named after it, and zips them.
 
+It needs KiCad 11.0 or newer. It was developed and tested against the 10.99 development builds
+that led up to 11.0, which is why that number appears in the examples below.
+
 Design: [docs/superpowers/specs/2026-09-19-multi-board-fab-export-design.md](docs/superpowers/specs/2026-09-19-multi-board-fab-export-design.md)
 
 ## Marking boards
@@ -37,13 +40,18 @@ property keys they do have, so a misspelt key is easy to spot.
 Items inside no rule area are left out of every board and listed in the report. An item inside
 two rule areas is an error.
 
+A footprint is assigned by its position alone; its pads are not checked, so the straddle warning
+does not cover footprints. One whose position is inside a rule area is exported whole even if its
+pads cross the boundary, and one whose position is outside is left out even if its body lies
+inside (the report lists it as unowned). Check the dry run for footprints near a boundary.
+
 Copper pours are refilled inside each board's outline (`--check-zones`), so a pour that spans the
 panel never carries a neighbouring board's copper into your gerbers.
 
 ## Output
 
-Next to the board file, using the output directory saved in the plot and drill dialogs (`fab/` if
-none is saved):
+Next to the board file, using the output directory saved in the plot dialog (`fab/` if none is
+saved):
 
 ```
 <output dir>/<board_name>/    gerber and drill files
@@ -56,6 +64,11 @@ back to `kicad-cli` defaults, and the report says which source each option came 
 never deletes anything and never modifies your board, your project or any other file. It writes
 only its own outputs: on a re-run it replaces the board's zip and any gerber or drill file with the
 same name. Other files already in a board's folder are left alone and kept out of the zip.
+
+A file counts as produced by a run when its modification time or size changed. On a file system
+with coarse timestamps (FAT, exFAT), a layer re-plotted within the same timestamp tick with an
+unchanged size would be taken for an old file and left out of the zip. The report lists such files
+under `left alone, not zipped (stale)`, so check that list if a layer is missing from a zip.
 
 ## Installing
 

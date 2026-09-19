@@ -95,6 +95,12 @@ def test_missing_cli_and_version_mismatch_are_errors(panel_path, no_config):
     assert any("could not determine" in e for e in _plan(panel_path, no_config, version=None).errors)
 
 
+def test_a_newer_cli_than_the_board_warns_but_does_not_block(panel_path, no_config):
+    plan = _plan(panel_path, no_config, version=(11, 0))
+    assert not any("kicad-cli is version" in e for e in plan.errors)
+    assert any("kicad-cli is version 11.0" in w for w in plan.warnings)
+
+
 def test_empty_output_directory_falls_back_to_fab(panel_path, no_config):
     _edit(panel_path, '(outputdirectory "fab_out/")', '(outputdirectory "")')
     assert _plan(panel_path, no_config).root == panel_path.parent / "fab"
@@ -124,3 +130,17 @@ def test_output_root_resolves_against_the_real_board_not_the_snapshot(panel_path
     snapshot_board.write_bytes(panel_path.read_bytes())
     plan = build_plan(Snapshot(snapshot_board, None, panel_path), CLI, VERSION, no_config)
     assert plan.root == panel_path.parent / "fab_out"
+
+
+def test_an_unreadable_output_folder_does_not_stop_the_plan(panel_path, no_config, monkeypatch):
+    (panel_path.parent / "fab_out" / "main").mkdir(parents=True)
+    real_iterdir = Path.iterdir
+
+    def iterdir(self):
+        if self.name == "main":
+            raise PermissionError(13, "denied", str(self))
+        return real_iterdir(self)
+
+    monkeypatch.setattr(Path, "iterdir", iterdir)
+    main = _plan(panel_path, no_config).boards[0]
+    assert main.name == "main" and main.existing_files == []

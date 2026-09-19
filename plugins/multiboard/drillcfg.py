@@ -3,8 +3,13 @@
 KiCad keeps the "Generate Drill Files" dialog's control values in the user's kicad_common.json
 under dialog.controls, keyed by widget class and creation order (``wxChoice_2`` is the third
 wxChoice created). Only the output directory and aux origin are also stored in the board, so the
-rest can only come from here. If the block is missing or does not have the expected shape (a
-newer KiCad may have reordered the dialog) every option falls back to kicad-cli's default.
+rest can only come from here. If the block is missing or malformed (a widget is absent, of the
+wrong type, or a choice index is out of range) every option falls back to kicad-cli's default.
+
+The mapping from widget to option is positional and was checked against the creation order in
+KiCad's ``dialog_gendrill_base.cpp``. A future KiCad that keeps the same widget inventory but
+reorders it cannot be detected from the saved values; the report prints each flag with its source
+so a wrong drill setting is visible.
 """
 from __future__ import annotations
 
@@ -59,16 +64,28 @@ def config_home(env: Optional[Mapping[str, str]] = None, platform: Optional[str]
 
 
 def load_state(version: Optional[tuple[int, int]], home: Path) -> Optional[dict]:
-    """The drill dialog's saved block from ``<home>/<major.minor>/kicad_common.json``, or None."""
+    """The drill dialog's saved block from ``<home>/<major.minor>/kicad_common.json``, or None.
+
+    KiCad keys the block by the dialog's title, which is translated, so a non-English KiCad does
+    not store it under ``DIALOG_TITLE``. When that key is absent, the one block that has the drill
+    dialog's shape is used instead.
+    """
     if version is None:
         return None
     path = home / f"{version[0]}.{version[1]}" / "kicad_common.json"
     try:
         data = json.loads(path.read_text(encoding="utf-8"))
-        block = data["dialog"]["controls"][DIALOG_TITLE]
+        controls = data["dialog"]["controls"]
+        block = controls[DIALOG_TITLE] if DIALOG_TITLE in controls else _find_by_shape(controls)
     except (OSError, ValueError, KeyError, TypeError):
         return None
     return block if isinstance(block, dict) else None
+
+
+def _find_by_shape(controls: dict) -> Optional[dict]:
+    """The single dialog block that looks like the drill dialog; None if there is none or several."""
+    matches = [block for block in controls.values() if isinstance(block, dict) and _shape_ok(block)]
+    return matches[0] if len(matches) == 1 else None
 
 
 def _shape_ok(state: dict) -> bool:

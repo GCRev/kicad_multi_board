@@ -74,9 +74,11 @@ def build_plan(snapshot: Snapshot, cli: Optional[str], cli_version: Optional[tup
     if cli is None:
         errors.append("kicad-cli was not found")
     else:
-        problem = exporter.check_version(cli_version, info.generator_version)
+        problem, caution = exporter.check_version(cli_version, info.generator_version)
         if problem:
             errors.append(problem)
+        if caution:
+            warnings.append(caution)
 
     root: Optional[Path] = None
     try:
@@ -110,7 +112,10 @@ def _plan_board(area: RuleArea, root: Path, classification: Classification) -> B
     kept, _ = kept_for(classification, area.name)
     items = [i for i in classification.items if i.index in kept]
     folder = root / area.name
-    existing = sorted(p.name for p in folder.iterdir() if p.is_file()) if folder.is_dir() else []
+    try:
+        existing = sorted(p.name for p in folder.iterdir() if p.is_file()) if folder.is_dir() else []
+    except OSError:
+        existing = []  # unreadable now; the export itself will fail for this board and say why
     zip_path = root / f"{area.name}.zip"
     return BoardPlan(
         area=area,

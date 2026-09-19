@@ -102,6 +102,7 @@ def build(root: Path, out_dir: Path, version: str | None = None) -> Path:
             for arcname, source in entries:
                 info = zipfile.ZipInfo(arcname, FIXED_TIME)
                 info.compress_type = zipfile.ZIP_DEFLATED
+                info.create_system = 3  # ZipInfo defaults to 0 on Windows, which would change the bytes
                 info.external_attr = 0o644 << 16
                 archive.writestr(info, source.read_bytes())
         verify(partial)

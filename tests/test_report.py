@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 
+from multiboard.discovery import SkippedZone
 from multiboard.exporter import CommandResult
 from multiboard.plan import Snapshot, build_plan
 from multiboard.report import render
@@ -68,3 +69,11 @@ def test_refused_run_says_so(panel_path, tmp_path):
     plan = build_plan(Snapshot(panel_path, None, panel_path), None, None, tmp_path / "no-config")
     text = render(plan, execute(plan, tmp_path / "work"), dry_run=False)
     assert "refused to run because the plan has errors; nothing was written" in text
+
+
+def test_report_words_a_skipped_area_with_no_outline_as_a_phrase(panel_path, tmp_path):
+    plan = _plan(panel_path, tmp_path)
+    plan.discovery.skipped = [SkippedZone("no 'board_name' property", (), None, None)]
+    text = render(plan, None, dry_run=True)
+    assert "  with no outline: no 'board_name' property; no properties" in text
+    assert "(no outline)" not in text

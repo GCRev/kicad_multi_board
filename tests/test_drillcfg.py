@@ -88,6 +88,31 @@ def test_load_state_reads_the_versioned_file(tmp_path, saved_state):
     assert load_state(None, tmp_path) is None
 
 
+def _write_controls(tmp_path, controls):
+    (tmp_path / "10.99").mkdir(exist_ok=True)
+    (tmp_path / "10.99" / "kicad_common.json").write_text(
+        json.dumps({"dialog": {"controls": controls}}), encoding="utf-8")
+
+
+def test_load_state_finds_the_block_under_a_translated_title(tmp_path, saved_state):
+    """KiCad keys the block by the localized dialog title, e.g. 'Bohrdateien erzeugen'."""
+    _write_controls(tmp_path, {"Bohrdateien erzeugen": saved_state, "Plot": {"wxChoice_0": 1}})
+    assert load_state((10, 99), tmp_path) == saved_state
+
+
+def test_load_state_does_not_guess_when_no_block_or_several_blocks_have_the_shape(tmp_path, saved_state):
+    _write_controls(tmp_path, {"Plot": {"wxChoice_0": 1}})
+    assert load_state((10, 99), tmp_path) is None
+    _write_controls(tmp_path, {"Bohrdateien erzeugen": saved_state, "Percage": dict(saved_state)})
+    assert load_state((10, 99), tmp_path) is None
+
+
+def test_the_english_title_wins_over_the_shape_scan(tmp_path, saved_state):
+    other = dict(saved_state, wxChoice_2=1)
+    _write_controls(tmp_path, {"Generate Drill Files": saved_state, "Bohrdateien erzeugen": other})
+    assert load_state((10, 99), tmp_path) == saved_state
+
+
 @pytest.mark.parametrize("content", ["not json", "{}", '{"dialog": {"controls": {}}}', '{"dialog": []}',
                                      '{"dialog": {"controls": {"Generate Drill Files": 5}}}'])
 def test_load_state_tolerates_bad_files(tmp_path, content):

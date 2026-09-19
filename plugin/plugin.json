@@ -1,0 +1,28 @@
+{
+  "$schema": "https://go.kicad.org/api/schemas/v1",
+  "identifier": "io.github.multiboard-fab-export",
+  "name": "Multi-Board Fabrication Export",
+  "description": "Exports separate gerber and drill outputs, and a zip, for each board marked out by a rule area on Edge.Cuts.",
+  "runtime": {
+    "type": "python",
+    "min_version": "3.9"
+  },
+  "actions": [
+    {
+      "identifier": "export",
+      "name": "Export Boards",
+      "description": "Export fabrication outputs for every board marked with a board_name rule area.",
+      "show-button": true,
+      "scopes": ["pcb"],
+      "entrypoint": "export_boards.py"
+    },
+    {
+      "identifier": "dry_run",
+      "name": "Export Boards (Dry Run)",
+      "description": "Report which boards, items and files an export would produce, without writing anything.",
+      "show-button": true,
+      "scopes": ["pcb"],
+      "entrypoint": "export_boards_dry_run.py"
+    }
+  ]
+}

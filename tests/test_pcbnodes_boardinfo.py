@@ -44,6 +44,9 @@ def test_custom_properties_and_uuid():
     ("(gr_arc (start 1 1) (mid 2 2) (end 3 1))", [(1, 1), (2, 2), (3, 1)]),
     ("(gr_poly (pts (xy 1 1) (xy 2 1) (xy 2 2)))", [(1, 1), (2, 1), (2, 2)]),
     ("(footprint \"F\" (at 10 20 90) (pad \"1\" (at 99 99)))", [(10, 20)]),
+    # KiCad 10.99 (file version 20260901) writes a footprint's position as a transform, not (at).
+    ("(footprint \"F\" (transform (translate 167 82.65) (rotate -90) (scale 1 1)) "
+     "(property \"Reference\" \"U6\" (at 0 -3.45 90)) (pad \"1\" (at 99 99)))", [(167, 82.65)]),
     ("(embedded_fonts no)", []),
 ])
 def test_item_points(text, expected):

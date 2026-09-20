@@ -1,7 +1,7 @@
-"""KiCad action: export every tagged board from the open panel."""
+"""KiCad action: open the multi-board export window."""
 import sys
 
-from multiboard.ipc import run_action
+from multiboard.ipc import run_ui
 
 if __name__ == "__main__":
-    sys.exit(run_action(dry_run=False))
+    sys.exit(run_ui())

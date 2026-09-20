@@ -76,6 +76,20 @@ def test_footprint_uses_its_own_position_not_its_pads():
     assert r.straddlers == []
 
 
+def test_footprint_positioned_by_a_transform_is_owned_by_that_position():
+    # The 20260901 file format has no (at) on a footprint; its label's local offset must not be used.
+    r = _classify('(footprint "F" (transform (translate 5 5) (rotate 90) (scale 1 1)) '
+                  '(property "Reference" "U1" (at 0 -3.45 90)))')
+    assert r.owners[1] == ["left"]
+    assert r.unowned == []
+
+
+def test_footprint_with_no_position_is_unowned_not_placed_by_a_nested_local_coordinate():
+    r = _classify('(footprint "F" (property "Reference" "U1" (at 5 5 0)))')
+    assert r.owners[1] == []
+    assert [describe(i) for i in r.unowned] == ["footprint"]
+
+
 def test_groups_survive_with_only_their_own_members():
     body = ('(segment (start 1 1) (end 2 2) (uuid "s1")) (segment (start 21 1) (end 22 2) (uuid "s2")) '
             '(group "g" (uuid "g1") (members "s1" "s2")) '

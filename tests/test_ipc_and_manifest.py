@@ -23,7 +23,9 @@ def test_manifest_is_valid_against_kicads_schema_and_entrypoints_exist():
     for action in manifest["actions"]:
         assert (PLUGIN / action["entrypoint"]).is_file()
         assert action["scopes"] == ["pcb"]
-    assert [a["identifier"] for a in manifest["actions"]] == ["export", "dry_run"]
+        for icon in action["icons-light"] + action["icons-dark"]:  # a button with no icon is blank
+            assert (PLUGIN / icon).is_file()
+    assert [a["identifier"] for a in manifest["actions"]] == ["export"]
 
 
 def test_plugin_requirements_name_kipy():
@@ -181,3 +183,18 @@ def test_a_viewer_that_raises_does_not_lose_the_exit_code(monkeypatch, panel_pat
     _install_fake_kipy(monkeypatch, FakeKiCad(FakeBoard(panel_path.parent, panel_path), tmp_path / "settings"))
     assert ipc.run_action(dry_run=True, runner=_cli) == 0
     assert (tmp_path / "settings" / "dry_run_report.txt").is_file()
+
+
+def test_without_wxpython_the_action_falls_back_to_a_dry_run_report_file(monkeypatch, opened, panel_path, tmp_path):
+    monkeypatch.setitem(sys.modules, "multiboard.dialog", None)  # makes `from . import dialog` fail
+    monkeypatch.setattr(ipc, "run_action", lambda **kwargs: kwargs)
+    kwargs = ipc.run_ui()
+    assert kwargs["dry_run"] is True
+    assert "needs wxPython" in kwargs["notice"] and "nothing was exported" in kwargs["notice"]
+
+
+def test_the_fallback_notice_goes_above_the_report(monkeypatch, opened, panel_path, tmp_path):
+    _install_fake_kipy(monkeypatch, FakeKiCad(FakeBoard(panel_path.parent, panel_path), tmp_path / "settings"))
+    assert ipc.run_action(dry_run=True, runner=_cli, notice="NOTICE\n\n") == 0
+    text = (tmp_path / "settings" / "dry_run_report.txt").read_text(encoding="utf-8")
+    assert text.startswith("NOTICE\n\nMulti-board fabrication export - DRY RUN")

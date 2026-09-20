@@ -82,13 +82,22 @@ def item_points(node: Node) -> list[Point]:
     """Defining points of a board item, anchor first.
 
     Order is at, start, center, mid, end, then the (pts ...) vertices. Only direct children are
-    read, so a footprint yields its own (at) and not those of its pads. Works for every item type
-    that has coordinates, including ones this plugin has never heard of.
+    read, so a footprint yields its own position and not those of its pads. Works for every item
+    type that has coordinates, including ones this plugin has never heard of.
+
+    A footprint's position is its (at); files from KiCad 10.99 (format 20260901) write it instead as
+    (transform (translate x y) (rotate r) (scale sx sy)), and the translate is the anchor.
     """
     points: list[Point] = []
     for key in ("at", "start", "center", "mid", "end"):
         child = node.find(key)
         point = _xy(child) if child else None
+        if point:
+            points.append(point)
+    if not points and node.head == "footprint":
+        transform = node.find("transform")
+        translate = transform.find("translate") if transform else None
+        point = _xy(translate) if translate else None
         if point:
             points.append(point)
     pts = node.find("pts")

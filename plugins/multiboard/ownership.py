@@ -94,7 +94,8 @@ def classify(root: Node, areas: Sequence[RuleArea]) -> Classification:
             continue
 
         points = tuple(item_points(child))
-        if not points:
+        if not points and kind != "footprint":
+            # A footprint's nested coordinates are relative to it, so they say nothing about where it sits.
             nested = first_nested_point(child)
             points = (nested,) if nested else ()
         if not points and kind not in KNOWN_ITEMS:

@@ -81,7 +81,7 @@ under `left alone, not zipped (stale)`, so check that list if a layer is missing
 3. Copy the `plugins` folder into KiCad's user plugins folder, for example
    `Documents\KiCad\10.99\plugins\multiboard-fab-export\`. KiCad finds it by scanning for
    `plugin.json`, builds a Python environment for it and installs `requirements.txt` on first use.
-4. Restart KiCad. The PCB editor toolbar gets **Export Boards** and **Export Boards (Dry Run)**.
+4. Restart KiCad. The PCB editor toolbar gets an **Export Boards** button.
 
 ### Building the PCM package
 
@@ -108,8 +108,22 @@ repository entry needs. See [KiCad's addon docs](https://dev-docs.kicad.org/en/a
 for the layout PCM expects. Manual installation (step 3 above) does not need `metadata.json` at
 all.
 
-Each run writes a report (`export_report.txt` or `dry_run_report.txt`) into the plugin's settings
-folder and opens it. Start with the dry run.
+## Using it
+
+Click **Export Boards** in the PCB editor toolbar. A window opens and immediately analyses the board
+KiCad has open, without writing anything. It shows the board file, the output root, the `kicad-cli`
+in use, counts (boards, items, unowned items, skipped areas, errors, warnings) and the full report
+in a text view. Read that first: it is the dry run.
+
+- **Export** writes every board's folder and zip from the plan you are looking at, then replaces the
+  text view with the result. It is disabled while the plan has errors.
+- **Refresh** takes a new snapshot of the board, for after you have changed it in KiCad (KiCad stays
+  usable while the window is open).
+- **Copy** puts the text view's contents on the clipboard.
+
+The window needs wxPython, which KiCad's own Python includes. Where it is missing, the button writes
+`dry_run_report.txt` into the plugin's settings folder and opens it instead; nothing is exported
+in that case, so use the command line below.
 
 ## Command line
 

@@ -11,18 +11,18 @@
     {
       "identifier": "export",
       "name": "Export Boards",
-      "description": "Export fabrication outputs for every board marked with a board_name rule area.",
+      "description": "Preview what each board marked with a board_name rule area will contain, then export gerbers, drills and a zip for each.",
       "show-button": true,
       "scopes": ["pcb"],
-      "entrypoint": "export_boards.py"
-    },
-    {
-      "identifier": "dry_run",
-      "name": "Export Boards (Dry Run)",
-      "description": "Report which boards, items and files an export would produce, without writing anything.",
-      "show-button": true,
-      "scopes": ["pcb"],
-      "entrypoint": "export_boards_dry_run.py"
+      "entrypoint": "export_boards.py",
+      "icons-light": [
+        "icons/export-light-24.png",
+        "icons/export-light-48.png"
+      ],
+      "icons-dark": [
+        "icons/export-dark-24.png",
+        "icons/export-dark-48.png"
+      ]
     }
   ]
 }

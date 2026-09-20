@@ -1,0 +1,93 @@
+name: Release
+
+# Runs the tests, builds the PCM package with scripts/build_package.py and publishes it as a GitHub
+# release tagged v<version> (the first version in metadata.json). A push to main only releases when
+# that tag does not exist yet, so bump the version in metadata.json to cut a new release. A manual run
+# does the same, and can replace an existing release of the current version.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      replace:
+        description: Replace the release for the current version if it already exists
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4.4.0
+
+      - uses: actions/setup-python@v5.6.0
+        with:
+          python-version: "3.12"
+
+      - name: Run tests
+        run: |
+          python -m pip install -r requirements-dev.txt
+          python -m pytest
+
+      - name: Determine the release tag
+        id: tag
+        run: |
+          version=$(python -c "import json; print(json.load(open('metadata.json'))['versions'][0]['version'])")
+          tag="v${version}"
+          exists=false
+          if gh release view "$tag" >/dev/null 2>&1; then
+            exists=true
+          fi
+          publish=true
+          if [ "$exists" = true ] && [ "${{ inputs.replace }}" != "true" ]; then
+            publish=false
+            echo "Release $tag already exists; bump the version in metadata.json to publish a new one."
+          fi
+          {
+            echo "tag=$tag"
+            echo "exists=$exists"
+            echo "publish=$publish"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Build package
+        if: steps.tag.outputs.publish == 'true'
+        id: build
+        run: |
+          python scripts/build_package.py | tee build.txt
+          {
+            echo "package=$(ls dist/*-pcm.zip)"
+            echo "sha256=$(awk '/download_sha256/ {print $3}' build.txt)"
+            echo "download_size=$(awk '/download_size/ {print $3}' build.txt)"
+            echo "install_size=$(awk '/install_size/ {print $3}' build.txt)"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Remove the release being replaced
+        if: steps.tag.outputs.publish == 'true' && steps.tag.outputs.exists == 'true'
+        run: gh release delete "${{ steps.tag.outputs.tag }}" --cleanup-tag --yes
+
+      - name: Create release
+        if: steps.tag.outputs.publish == 'true'
+        run: |
+          cat > notes.md <<EOF
+          PCM repository fields:
+
+          - download_sha256: \`${{ steps.build.outputs.sha256 }}\`
+          - download_size: ${{ steps.build.outputs.download_size }}
+          - install_size: ${{ steps.build.outputs.install_size }}
+
+          EOF
+          gh release create "${{ steps.tag.outputs.tag }}" "${{ steps.build.outputs.package }}" \
+            --target "$GITHUB_SHA" \
+            --title "${{ steps.tag.outputs.tag }}" \
+            --notes-file notes.md \
+            --generate-notes

@@ -1,9 +1,5 @@
 #!/bin/sh
-# Builds the KiCad PCM plugin zip into dist/ (install it via Plugin and Content Manager >
-# "Install from File..."). Extra arguments pass straight to build_package.py:
-#
-#   scripts/build_package.sh
-#   scripts/build_package.sh --list
+# Builds the KiCad PCM plugin zip into dist/. Arguments pass through to build_package.py.
 set -eu
 here=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 # Try each interpreter rather than trust the name: on Windows, python3 can be a Store stub that fails.

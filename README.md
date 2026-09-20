@@ -8,7 +8,7 @@ in a folder named after it, and zips them.
 It needs KiCad 11.0 or newer. It was developed and tested against the 10.99 development builds
 that led up to 11.0, which is why that number appears in the examples below.
 
-Design: [docs/superpowers/specs/2026-09-19-multi-board-fab-export-design.md](docs/superpowers/specs/2026-09-19-multi-board-fab-export-design.md)
+Design: [docs/design.md](docs/design.md)
 
 ## Marking boards
 

@@ -1,15 +1,9 @@
-"""Resolves drill-export options from the drill dialog's remembered state.
+"""Resolves drill-export options from the drill dialog's saved state in kicad_common.json.
 
-KiCad keeps the "Generate Drill Files" dialog's control values in the user's kicad_common.json
-under dialog.controls, keyed by widget class and creation order (``wxChoice_2`` is the third
-wxChoice created). Only the output directory and aux origin are also stored in the board, so the
-rest can only come from here. If the block is missing or malformed (a widget is absent, of the
-wrong type, or a choice index is out of range) every option falls back to kicad-cli's default.
-
-The mapping from widget to option is positional and was checked against the creation order in
-KiCad's ``dialog_gendrill_base.cpp``. A future KiCad that keeps the same widget inventory but
-reorders it cannot be detected from the saved values; the report prints each flag with its source
-so a wrong drill setting is visible.
+The controls are keyed by widget class and creation order (``wxChoice_2`` is the third wxChoice),
+so the mapping to options is positional, taken from ``dialog_gendrill_base.cpp``. A missing or
+malformed block falls back to kicad-cli's defaults. A reordering KiCad cannot be detected, so the
+report prints each flag with its source.
 """
 from __future__ import annotations
 

@@ -1,11 +1,6 @@
-"""Robustness check against KiCad's own board files. Skipped unless KICAD_SOURCE is set.
+"""Parse, classify and render every board under qa/data/pcbnew; each result must still parse.
 
-    $env:KICAD_SOURCE = "C:\\path\\to\\kicad"     # a KiCad source checkout
-    python -m pytest tests/test_corpus.py
-
-Every board under qa/data/pcbnew is parsed, classified against one area covering the whole
-board and against one covering nothing, and rendered; each result must still parse. It reads about
-150 MB and takes roughly a minute, so it is opt-in.
+Skipped unless KICAD_SOURCE points at a KiCad source checkout. Reads about 150 MB, takes about a minute.
 """
 import os
 from pathlib import Path

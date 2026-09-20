@@ -1,9 +1,4 @@
-# Builds the KiCad PCM plugin zip into dist\ (install it via Plugin and Content Manager >
-# "Install from File..."). Extra arguments pass straight to build_package.py:
-#
-#   .\scripts\build_package.ps1
-#   .\scripts\build_package.ps1 --list
-#   .\scripts\build_package.ps1 --out-dir C:\temp\out
+# Builds the KiCad PCM plugin zip into dist\. Arguments pass through to build_package.py.
 $script = Join-Path $PSScriptRoot "build_package.py"
 $probe = "import sys; sys.exit(sys.version_info < (3, 9))"
 

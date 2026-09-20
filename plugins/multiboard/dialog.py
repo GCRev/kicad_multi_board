@@ -1,10 +1,6 @@
 """The export window (wxPython): a summary, the report in a text view, and an Export button.
 
-It opens by snapshotting the open board and building the plan, which writes nothing, and shows that
-as the report. Export then runs on that same plan, so what is exported is what was on screen. The
-window belongs to this plugin's process, so KiCad itself stays usable behind it; use Refresh to
-take a new snapshot after changing the board.
-
+It opens on a dry-run plan of the open board; Export runs that same plan, and Refresh takes a new snapshot.
 Imported by ``ipc.run_ui``, which falls back to a report file when wxPython is missing.
 """
 from __future__ import annotations
@@ -41,8 +37,6 @@ class ExportDialog(wx.Dialog):
         self.Bind(wx.EVT_CLOSE, self._on_close)
         self._start_analysis()
 
-    # ---- layout -------------------------------------------------------------------------------
-
     def _build(self) -> None:
         self._values: dict[str, wx.StaticText] = {}
         grid = wx.FlexGridSizer(2, 4, 12)
@@ -64,7 +58,7 @@ class ExportDialog(wx.Dialog):
 
         self._text = wx.TextCtrl(self, style=wx.TE_MULTILINE | wx.TE_READONLY | wx.TE_DONTWRAP | wx.TE_RICH2)
         self._text.SetFont(wx.Font(wx.FontInfo(10).Family(wx.FONTFAMILY_TELETYPE)))
-        # The rich-edit control keeps its own colours unless told; these follow the theme once it is enabled.
+        # The rich-edit control keeps its own colours unless told.
         self._text.SetBackgroundColour(wx.SystemSettings.GetColour(wx.SYS_COLOUR_WINDOW))
         self._text.SetForegroundColour(wx.SystemSettings.GetColour(wx.SYS_COLOUR_WINDOWTEXT))
 
@@ -94,8 +88,6 @@ class ExportDialog(wx.Dialog):
         self.SetMinSize(wx.Size(760, 560))
         self.SetSize(wx.Size(900, 680))
         self.CenterOnScreen()
-
-    # ---- state --------------------------------------------------------------------------------
 
     def _set_busy(self, message: str) -> None:
         self._busy = True
@@ -127,8 +119,6 @@ class ExportDialog(wx.Dialog):
         self._text.SetInsertionPoint(0)
         self._text.ShowPosition(0)
 
-    # ---- analysis -----------------------------------------------------------------------------
-
     def _start_analysis(self) -> None:
         self._plan = self._summary = None
         self._export.SetLabel("Export")
@@ -156,8 +146,6 @@ class ExportDialog(wx.Dialog):
         self._show(summary, text)
         self._set_idle(summary.can_export)
 
-    # ---- export -------------------------------------------------------------------------------
-
     def _on_export(self, _event: wx.CommandEvent) -> None:
         if self._plan is None:
             return
@@ -177,8 +165,6 @@ class ExportDialog(wx.Dialog):
         self._show(summary, text)
         self._export.SetLabel("Export again")
         self._set_idle(summary.can_export)
-
-    # ---- failures, copy, close ----------------------------------------------------------------
 
     def _failed(self, trace: str) -> None:
         self.exit_code = 3
@@ -206,11 +192,7 @@ class ExportDialog(wx.Dialog):
 
 
 def _follow_system_theme() -> None:
-    """Use the system's dark or light theme. Best effort: the window works either way.
-
-    wxMSW leaves dark mode off unless the application asks for it, and this plugin is its own process,
-    so KiCad's setting does not reach it. GTK and macOS follow the system without being asked.
-    """
+    """Follow the system dark/light theme; wxMSW needs to be asked, and KiCad's setting does not reach this process."""
     enable = getattr(wx.App, "MSWEnableDarkMode", None)
     if enable is not None:
         try:

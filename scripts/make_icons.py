@@ -1,9 +1,5 @@
 #!/usr/bin/env python3
-"""Regenerate the toolbar icons in plugins/icons/ (the PNGs are committed; run this only to change them).
-
-KiCad shows an action's icon in the PCB editor toolbar, and a button with no icon is blank. The one action
-gets a light-theme and a dark-theme icon at 24 px and 48 px (the 48 px one is for high-DPI screens).
-Standard library only.
+"""Regenerate the toolbar icons in plugins/icons/ (light and dark, 24 px and 48 px). The PNGs are committed.
 
     python scripts/make_icons.py
 """

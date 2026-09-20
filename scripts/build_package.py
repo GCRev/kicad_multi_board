@@ -1,9 +1,5 @@
 #!/usr/bin/env python3
-"""Build the KiCad PCM package zip ("Install from File" in the Plugin and Content Manager).
-
-The archive holds only what KiCad needs: metadata.json and LICENSE at the root, the plugin under
-plugins/ and an optional resources/ folder (icon). Tests, docs, sample projects and caches are
-left out. Standard library only.
+"""Build the KiCad PCM package zip: metadata.json, LICENSE, plugins/ and an optional resources/.
 
     python scripts/build_package.py            # writes dist/<identifier>-<version>-pcm.zip
     python scripts/build_package.py --list     # show what would go in, write nothing

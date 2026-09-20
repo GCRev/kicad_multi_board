@@ -79,14 +79,10 @@ def node_uuid(node: Node) -> Optional[str]:
 
 
 def item_points(node: Node) -> list[Point]:
-    """Defining points of a board item, anchor first.
+    """Defining points of a board item, anchor first: at, start, center, mid, end, then (pts ...).
 
-    Order is at, start, center, mid, end, then the (pts ...) vertices. Only direct children are
-    read, so a footprint yields its own position and not those of its pads. Works for every item
-    type that has coordinates, including ones this plugin has never heard of.
-
-    A footprint's position is its (at); files from KiCad 10.99 (format 20260901) write it instead as
-    (transform (translate x y) (rotate r) (scale sx sy)), and the translate is the anchor.
+    Only direct children are read, so a footprint yields its own position, not its pads'. Format
+    20260901 (KiCad 10.99) writes a footprint's position as (transform (translate x y) ...).
     """
     points: list[Point] = []
     for key in ("at", "start", "center", "mid", "end"):

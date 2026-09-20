@@ -8,8 +8,6 @@ in a folder named after it, and zips them.
 It needs KiCad 11.0 or newer. It was developed and tested against the 10.99 development builds
 that led up to 11.0, which is why that number appears in the examples below.
 
-Design: [docs/design.md](docs/design.md)
-
 ## Marking boards
 
 1. Draw a polygonal **rule area** on the `Edge.Cuts` layer around one board. It must fully
@@ -156,6 +154,3 @@ A robustness check over KiCad's own board files is opt-in (about two minutes):
 $env:KICAD_SOURCE = "C:\path\to\kicad"
 python -m pytest tests/test_corpus.py
 ```
-
-What can only be verified in a running KiCad is listed in
-[docs/smoke-test.md](docs/smoke-test.md).
